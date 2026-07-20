@@ -1,0 +1,350 @@
+// =============================================================================
+// SMART TREND PRO ENGINE
+// =============================================================================
+// This file contains SOURCE CODE ONLY.
+// No rules, no version history, no design discussion, no architecture debate.
+// Governing documents:
+//   - Smart Trend Pro Engine Specification   (frozen architecture, PRIN-* rules)
+//   - Smart Trend Pro Engine Development Log (history, freezes, amendments)
+//
+// Module Architecture below is FROZEN (Specification Section 4).
+// New functionality is added INSIDE existing modules only (PRIN-MODULE-CONTAINMENT).
+// New modules require the Architecture Amendment Procedure (Specification Section 10).
+// =============================================================================
+
+//@version=6
+
+// -----------------------------------------------------------------------------
+// FROZEN strategy() DECLARATION BLOCK
+// -----------------------------------------------------------------------------
+// This block is part of the frozen architecture. Parameter values may be
+// tuned; the presence/structure of this declaration is not to be altered
+// outside the Architecture Amendment Procedure.
+strategy(
+     title                = "Smart Trend Pro Engine",
+     shorttitle           = "STPE",
+     overlay              = true,
+     initial_capital      = 10000,
+     default_qty_type     = strategy.percent_of_equity,
+     default_qty_value    = 100,
+     commission_type      = strategy.commission.percent,
+     commission_value     = 0.0,
+     slippage             = 0,
+     calc_on_every_tick   = false,
+     process_orders_on_close = true)
+
+
+// #############################################################################
+// LAYER ARCHITECTURE (frozen — Specification Section 3)
+//
+//   CORE LAYER
+//       |
+//   DATA LAYER
+//       |
+//   DECISION LAYER
+//       |
+//   SIGNAL LAYER
+//       |
+//   EXECUTION LAYER
+//       |
+//   INTERFACE LAYER
+//       |
+//   FUTURE LAYER
+//
+// Data flows strictly downward (PRIN-DATA-FLOW). A layer consumes only the
+// immediately preceding layer's output (PRIN-LAYER-ISOLATION).
+// #############################################################################
+
+
+// =============================================================================
+// CORE LAYER
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// SYSTEM CORE — Declarations
+// -----------------------------------------------------------------------------
+// Global state and shared type declarations live here. No business logic.
+
+// (placeholder) var-scoped system state declarations go here
+
+
+// -----------------------------------------------------------------------------
+// SYSTEM CORE — Population
+// -----------------------------------------------------------------------------
+// Per-bar population of core state declared above. No decisions made here.
+
+// (placeholder) per-bar population of system core state goes here
+
+
+// -----------------------------------------------------------------------------
+// LONG SETTINGS
+// -----------------------------------------------------------------------------
+// All LONG-side settings are manual (PRIN-NO-AUTO-PARAMS) and fully
+// independent from SHORT (PRIN-LONG-SHORT-INDEPENDENCE).
+
+// --- Long General Settings ---
+// (placeholder)
+
+// --- Long Filter Settings ---
+// (placeholder — mirrors Long Filter Engine groups below)
+
+// --- Long Risk Settings ---
+// (placeholder)
+
+// --- Long Position Settings ---
+// (placeholder)
+
+// --- Long Signal Settings ---
+// (placeholder)
+
+// --- Long Visual Settings ---
+// (placeholder)
+
+// --- Long Alert Settings ---
+// (placeholder)
+
+
+// -----------------------------------------------------------------------------
+// SHORT SETTINGS
+// -----------------------------------------------------------------------------
+// All SHORT-side settings are manual (PRIN-NO-AUTO-PARAMS) and fully
+// independent from LONG (PRIN-LONG-SHORT-INDEPENDENCE). Never assume
+// SHORT settings mirror LONG values.
+
+// --- Short General Settings ---
+// (placeholder)
+
+// --- Short Filter Settings ---
+// (placeholder — mirrors Short Filter Engine groups below)
+
+// --- Short Risk Settings ---
+// (placeholder)
+
+// --- Short Position Settings ---
+// (placeholder)
+
+// --- Short Signal Settings ---
+// (placeholder)
+
+// --- Short Visual Settings ---
+// (placeholder)
+
+// --- Short Alert Settings ---
+// (placeholder)
+
+
+// =============================================================================
+// DATA LAYER
+// =============================================================================
+// Shared, LONG/SHORT-agnostic modules only. These modules compute objective
+// market state and MUST NOT produce trading decisions
+// (PRIN-LONG-SHORT-INDEPENDENCE (a), PRIN-LAYER-ISOLATION).
+
+// -----------------------------------------------------------------------------
+// MARKET QUALITY ENGINE
+// -----------------------------------------------------------------------------
+// Overall market quality state. No trading decisions.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// MARKET REGIME ENGINE
+// -----------------------------------------------------------------------------
+// Trend / range / transitional state. No trading decisions.
+// Not to be confused with the "Market Filters" group in the Decision Layer.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// SMART MONEY ENGINE
+// -----------------------------------------------------------------------------
+// Structure computation only: FVG, Order Blocks, Liquidity, BOS, CHoCH.
+// No trading decisions.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// AI ENGINE
+// -----------------------------------------------------------------------------
+// Probability / analytics computation only. No trading decisions.
+// (placeholder)
+
+
+// =============================================================================
+// DECISION LAYER
+// =============================================================================
+// Fully independent LONG and SHORT filter engines (PRIN-LONG-SHORT-INDEPENDENCE).
+// Each engine evaluates exactly five frozen filter groups
+// (PRIN-FILTER-CONTAINMENT, Specification Section 6). Disabled filters resolve
+// to Neutral Pass State (PRIN-NEUTRAL-PASS-STATE).
+
+// -----------------------------------------------------------------------------
+// LONG FILTER ENGINE
+// -----------------------------------------------------------------------------
+
+// --- Trend Filters (Long) ---
+// (placeholder)
+
+// --- Volatility Filters (Long) ---
+// (placeholder)
+
+// --- Momentum Filters (Long) ---
+// (placeholder)
+
+// --- Market Filters (Long) ---
+// (placeholder)
+
+// --- Confirmation Filters (Long) ---
+// (placeholder)
+
+// --- Long Filter Engine — aggregate result ---
+// (placeholder) e.g. longFiltersPassed = na
+
+
+// -----------------------------------------------------------------------------
+// SHORT FILTER ENGINE
+// -----------------------------------------------------------------------------
+
+// --- Trend Filters (Short) ---
+// (placeholder)
+
+// --- Volatility Filters (Short) ---
+// (placeholder)
+
+// --- Momentum Filters (Short) ---
+// (placeholder)
+
+// --- Market Filters (Short) ---
+// (placeholder)
+
+// --- Confirmation Filters (Short) ---
+// (placeholder)
+
+// --- Short Filter Engine — aggregate result ---
+// (placeholder) e.g. shortFiltersPassed = na
+
+
+// =============================================================================
+// SIGNAL LAYER
+// =============================================================================
+// Fully independent LONG and SHORT signal engines (PRIN-LONG-SHORT-INDEPENDENCE).
+
+// -----------------------------------------------------------------------------
+// LONG SIGNAL ENGINE
+// -----------------------------------------------------------------------------
+// Converts Long Filter Engine's passed-state into a concrete LONG entry signal.
+// (placeholder) e.g. longEntrySignal = na
+
+// -----------------------------------------------------------------------------
+// SHORT SIGNAL ENGINE
+// -----------------------------------------------------------------------------
+// Converts Short Filter Engine's passed-state into a concrete SHORT entry signal.
+// (placeholder) e.g. shortEntrySignal = na
+
+
+// =============================================================================
+// EXECUTION LAYER
+// =============================================================================
+// Fully independent LONG and SHORT execution modules, except the shared
+// platform adapter (PRIN-LONG-SHORT-INDEPENDENCE (b)).
+
+// -----------------------------------------------------------------------------
+// LONG RISK MANAGEMENT ENGINE
+// -----------------------------------------------------------------------------
+// Position size, SL, TP, RR, ATR multipliers — Long only.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// SHORT RISK MANAGEMENT ENGINE
+// -----------------------------------------------------------------------------
+// Position size, SL, TP, RR, ATR multipliers — Short only.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// LONG ENTRY ENGINE
+// -----------------------------------------------------------------------------
+// Entry conditions, position opening rules, re-entry rules — Long only.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// SHORT ENTRY ENGINE
+// -----------------------------------------------------------------------------
+// Entry conditions, position opening rules, re-entry rules — Short only.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// LONG POSITION MANAGEMENT ENGINE
+// -----------------------------------------------------------------------------
+// Trailing, breakeven, partial TP, scaling — Long only.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// SHORT POSITION MANAGEMENT ENGINE
+// -----------------------------------------------------------------------------
+// Trailing, breakeven, partial TP, scaling — Short only.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// LONG EXIT ENGINE
+// -----------------------------------------------------------------------------
+// Exit rules — Long only.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// SHORT EXIT ENGINE
+// -----------------------------------------------------------------------------
+// Exit rules — Short only.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// EXECUTION ENGINE (shared platform adapter)
+// -----------------------------------------------------------------------------
+// Translates already-approved LONG and SHORT execution instructions into
+// strategy.entry() / strategy.exit() / strategy.close() calls.
+// Contains NO trading logic, risk calculations, signal generation, or
+// position management logic (PRIN-LONG-SHORT-INDEPENDENCE (b)).
+// (placeholder)
+
+
+// =============================================================================
+// INTERFACE LAYER
+// =============================================================================
+// Shared technical adapters that render or dispatch already-determined,
+// separately-computed LONG and SHORT outputs (PRIN-LONG-SHORT-INDEPENDENCE (c),
+// PRIN-VISUAL-CONTRACT). No trading logic or decision logic here.
+
+// -----------------------------------------------------------------------------
+// ALERT ENGINE
+// -----------------------------------------------------------------------------
+// All alertcondition() calls live here exclusively.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// VISUAL ENGINE
+// -----------------------------------------------------------------------------
+// Decides WHAT to show, WHICH color, WHAT transparency. Does not draw.
+// (placeholder)
+
+// -----------------------------------------------------------------------------
+// PLOTS ENGINE
+// -----------------------------------------------------------------------------
+// plot() / plotshape() / fill() / bgcolor() / table() calls only. No logic.
+// (placeholder)
+
+
+// =============================================================================
+// FUTURE LAYER
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// PORTFOLIO ENGINE
+// -----------------------------------------------------------------------------
+// Reserved. (PRIN-MODULE-CONTAINMENT — activation requires Amendment Procedure)
+
+// -----------------------------------------------------------------------------
+// EXPERIMENTAL ENGINE
+// -----------------------------------------------------------------------------
+// Sole location for experimental functionality (PRIN-EXPERIMENTAL-ISOLATION).
+// (placeholder)
+
+
+// =============================================================================
+// END OF SKELETON
+// =============================================================================

@@ -2,11 +2,127 @@
 
 **Document Status:** ACTIVE — first entry recorded (LOG-00001)
 **Document Type:** Historical record of implementation decisions, freezes, and amendments
-**Companion to:** Smart Trend Pro Engine Specification (Single Source of Truth)
+**Companion to:** Smart Trend Pro Engine Specification (Single Source of Truth)[SmartTrendProEngine_DevelopmentLog_1.md](https://github.com/user-attachments/files/30193847/SmartTrendProEngine_DevelopmentLog_1.md)
+
 
 This document records the *history* of the project: why decisions were made, when modules were frozen, and what amendments were approved. It never overrides the Specification. If a conflict exists between an entry here and the Specification, the Specification governs, and this entry must be corrected.
 
+---# SMART TREND PRO ENGINE — DEVELOPMENT LOG
+
+Постоянный журнал проекта. Пополняется по каждому модулю на всех стадиях
+Module Lifecycle: Design → Implementation → Testing → Optimization → Freeze.
+
+**Правило ведения:** запись создаётся один раз на модуль и дополняется по
+мере прохождения стадий. После Freeze запись не редактируется, кроме как
+через Amendment Procedure (см. раздел ниже).
+
 ---
+
+## MODULE: SYSTEM CORE
+
+**Layer:** CORE (первый слой в Data Flow: CORE → DATA → DECISION → SIGNAL → EXECUTION → INTERFACE → FUTURE)
+**Status:** Testing complete → Optimization in progress
+**Files:** `SmartTrendProEngine_v1_SystemCore.pine` (production), `SmartTrendProEngine_v1_SystemCore_TESTING.pine` (temporary QA build, не входит в контракт)
+
+### Design
+Определён контракт `SystemCore` — единственный источник системного состояния
+движка. Разделены зоны ответственности: что обязано храниться в CORE
+(системное состояние, флаги, готовность данных, fail-safe, module readiness)
+и что запрещено (любая торговая логика — сигналы, фильтры, риск, AI, Smart
+Money, визуализация).
+
+### Implementation
+- UDT `SystemCore` с группами полей: Engine Information, Runtime Information,
+  Bar State, Data Availability, Strategy State, Global Execution, Fail Safe,
+  Module Readiness.
+- Единая функция `populateSystemCore()` — единственная точка записи в
+  `SystemCore`.
+- Inputs ограничены системными тумблерами (`Enable Strategy/LONG/SHORT/Experimental`).
+
+### Testing — находки
+
+1. **`isLastBar` через `barstate.islast` не компилируется.**
+   Pine Script требует `calc_on_every_tick = true` для использования
+   `barstate.islast` в `strategy()`. Включать этот режим в проде не стали —
+   он даёт пересчёт на каждом тике и риск перерисовки, что противоречит
+   принципу стабильности EXECUTION-слоя.
+   **Решение:** `isLastBar := bar_index == last_bar_index`. Семантика поля
+   не меняется, `calc_on_every_tick` остаётся `false`.
+
+2. **Debug-таблица показывает только последний обработанный бар.**
+   Не баг — особенность `table` в Pine: объект переписывается на каждом
+   баре, визуальная прокрутка графика не меняет его содержимое. Для
+   побарной исторической проверки использован `plot(..., display =
+   display.data_window)` — значения по конкретному бару читаются через
+   Data Window при наведении курсора.
+
+3. **`isFirstBar = true` ⇒ `isCorePopulated = true`, `isInitializationCompleted = false`.**
+   Подтверждено на реальном первом баре истории (BTCUSDT.P, 4h, OKX/Bybit).
+   Это ключевое поведение: ядро физически заполнено данными до того, как
+   считается "готовым" для потребления другими слоями — на первом баре
+   DECISION/SIGNAL обязаны оставаться неактивными.
+
+4. **`isRealtime` не означает "текущий формирующийся бар".**
+   Означает "бар, закрывшийся уже после старта текущей сессии скрипта".
+   Все бары, загруженные как история до запуска скрипта, остаются
+   `isHistorical = true` до перезагрузки страницы. Поведение подтверждено,
+   не является дефектом.
+
+5. **Pine требует минимум один visual-output вызов в `strategy()`.**
+   Компилятор не даст собрать `strategy()` без хотя бы одного
+   `plot/bgcolor/table/...`, даже если модулю нечего показывать.
+   **Решение:** добавлен `plot(core.isCorePopulated ? 1 : 0, title =
+   "STPE_CORE_COMPILER_PLACEHOLDER", display = display.data_window)` —
+   без визуального присутствия на графике. Это техническая заглушка ради
+   компиляции, не реализация VISUAL ENGINE. **Подлежит пересмотру**, когда
+   появится VISUAL ENGINE — либо заменяется реальным выводом того слоя,
+   либо остаётся как есть, если у VISUAL ENGINE появится собственный
+   независимый visual-output.
+
+### Testing — покрытие (все пункты подтверждены)
+
+| Группа | Проверено |
+|---|---|
+| Fail Safe (`isDataInvalid`/`isFailSafeTriggered`/`isNeutralPassAvailable`) | ✅ |
+| Strategy State (все тумблеры, все комбинации) | ✅ |
+| Global Execution (`hasPosition`/`positionDirection`/`positionSize`/`isFlat`) | ✅ на реальных сделках long/short |
+| Module Readiness (`isCorePopulated` vs `isInitializationCompleted`) | ✅ на первом баре истории |
+| Bar State (`isFirstBar`/`isLastBar`/`barIndexCurrent`) | ✅ через Data Window point-in-time проверку |
+| Runtime (`isRealtime`/`isHistorical`) | ✅ |
+
+### Optimization
+_(в процессе)_
+- [ ] Убрать QA-harness полностью из production-файла (debug table, Data Window plots, жёлтая подсветка, тест-хуки входа в позицию) — production-файл их изначально не содержал, подтвердить финальную сверку перед Freeze.
+- [ ] Проверить производительность `populateSystemCore()` на большом датасете (5000+ баров, `max_bars_back`).
+
+### Freeze
+_(ожидает завершения Optimization)_
+- [ ] Дата заморозки:
+- [ ] Итоговая версия контракта зафиксирована как v1.0.0-core
+- [ ] Project Freeze Status обновлён
+
+---
+
+## Amendment Procedure (для справки)
+
+Если после заморозки модуля в последующих слоях обнаружится нехватка
+системного состояния, модуль временно выводится из Freeze через отдельную
+запись в этом логе с пометкой `[AMENDMENT]`, указанием причины и ссылкой на
+модуль, который выявил нехватку. Обычное расширение функциональности
+внутри уже существующих групп полей разрешено и Amendment не требует.
+
+---
+
+## Project Freeze Status
+
+| Модуль | Статус |
+|---|---|
+| SYSTEM CORE | Testing complete, Optimization in progress |
+| LONG SETTINGS | Not started |
+| SHORT SETTINGS | Not started |
+| LONG FILTER SETTINGS | Not started |
+| SHORT FILTER SETTINGS | Not started |
+
 
 ## 1. HOW TO USE THIS LOG
 
